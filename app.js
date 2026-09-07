@@ -1,7 +1,9 @@
-const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
-const SUPABASE_KEY = 'SUA_SB_PUBLISHABLE_KEY';
-const DEVICE_ID = 'COLE_AQUI_UUID_DO_DEVICE_CX001';
+const SUPABASE_URL = 'https://oihzayyjpczdmocsxzgz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Cu1IkJ64sMm4yy6WnTUkVA_moP44Oaj';
+const DEVICE_ID = 'ca95d39a-d322-40ad-9671-4322b8e50cbf';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
 
 function paint(s){
   const level=Number(s.level_percent||0);
