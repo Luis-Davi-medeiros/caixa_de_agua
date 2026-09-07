@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Controle da Caixa</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<main class="app">
+  <header><h1>Controle da Caixa</h1><span id="online">OFFLINE</span></header>
+  <section class="card level"><div class="label">Nível da caixa</div><div id="level" class="big">--%</div><div class="bar"><i id="bar"></i></div></section>
+  <section class="grid">
+    <div class="card"><b>Boia mestre</b><strong id="float">--</strong></div>
+    <div class="card"><b>Fluxo</b><strong id="flow">-- L/min</strong></div>
+    <div class="card"><b>Bomba 1</b><strong id="pump1">--</strong><button onclick="command('PUMP1_ON')">Ligar</button><button onclick="command('PUMP1_OFF')">Desligar</button></div>
+    <div class="card"><b>Bomba 2</b><strong id="pump2">--</strong><button onclick="command('PUMP2_ON')">Ligar</button><button onclick="command('PUMP2_OFF')">Desligar</button></div>
+  </section>
+  <button class="stop" onclick="command('ALL_OFF')">DESLIGAR TODAS</button>
+  <p id="msg"></p>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
