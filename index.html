@@ -1,24 +1,234 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Controle da Caixa</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#081220">
+  <meta name="description" content="ThermoLink — Monitoramento e Controle de Dessalinização de Água">
+  <title>ThermoLink — Dessalinização & Caixa d'Água</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<main class="app">
-  <header><h1>Controle da Caixa</h1><span id="online">OFFLINE</span></header>
-  <section class="card level"><div class="label">Nível da caixa</div><div id="level" class="big">--%</div><div class="bar"><i id="bar"></i></div></section>
-  <section class="grid">
-    <div class="card"><b>Boia mestre</b><strong id="float">--</strong></div>
-    <div class="card"><b>Fluxo</b><strong id="flow">-- L/min</strong></div>
-    <div class="card"><b>Bomba 1</b><strong id="pump1">--</strong><button onclick="command('PUMP1_ON')">Ligar</button><button onclick="command('PUMP1_OFF')">Desligar</button></div>
-    <div class="card"><b>Bomba 2</b><strong id="pump2">--</strong><button onclick="command('PUMP2_ON')">Ligar</button><button onclick="command('PUMP2_OFF')">Desligar</button></div>
-  </section>
-  <button class="stop" onclick="command('ALL_OFF')">DESLIGAR TODAS</button>
-  <p id="msg"></p>
-</main>
-<script src="app.js"></script>
+
+  <!-- Mobile Screen Container -->
+  <div class="mobile-app-wrapper">
+
+    <!-- Top Navigation Bar -->
+    <header class="app-nav">
+      <div class="brand-badge">
+        <div class="brand-icon">
+          <!-- Hydro Drop Icon -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <h1>THERMOLINK</h1>
+          <span>Controle de Água</span>
+        </div>
+      </div>
+
+      <div id="statusPill" class="status-pill online">
+        <span class="status-dot"></span>
+        <span id="statusPillText">ONLINE</span>
+      </div>
+    </header>
+
+    <!-- Cloud & Safety Status Bar -->
+    <div class="cloud-status-bar">
+      <div id="cloudSourcePill" class="source-badge cloud">
+        <span class="pulse-dot"></span>
+        <span id="cloudSourceText">☁️ Supabase Nuvem</span>
+      </div>
+      <div id="boiaMecanicaPill" class="boia-badge ok">
+        <span id="boiaMecanicaText">🛡️ Boia Mecânica: OK</span>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="app-content">
+
+      <!-- TOP: Caixa d'Água Fortlev Section -->
+      <section class="tank-section">
+        <div class="section-header">
+          <div class="section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            </svg>
+            Caixa d'Água
+          </div>
+          <span class="tag-fortlev">FORTLEV</span>
+        </div>
+
+        <div class="fortlev-container">
+          <!-- Graphic: Realistic Fortlev Water Tank with Animated Water -->
+          <div class="fortlev-tank-graphic">
+            <div class="tank-outer-shell">
+              <!-- Fortlev Lid -->
+              <div class="tank-lid">
+                <div class="lid-handle"></div>
+              </div>
+
+              <!-- Fortlev Barrel Body -->
+              <div class="tank-barrel">
+                <div class="tank-glass-sheen"></div>
+                <div class="tank-rib r1"></div>
+                <div class="tank-rib r2"></div>
+                <div class="tank-rib r3"></div>
+                <div class="fortlev-print">FORTLEV</div>
+
+                <!-- Animated Water Mass -->
+                <div id="tankWaterMass" class="tank-water-mass">
+                  <div class="wave-surface"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tank Level Metric Box -->
+          <div class="tank-metrics-box">
+            <div class="level-big-value">
+              <span id="levelNumber" class="level-number">25</span>
+              <span class="level-unit">%</span>
+            </div>
+            <div id="levelStatusText" class="level-status-pill">Nível Médio</div>
+            <div class="level-bar-mini">
+              <div id="levelBarFill" class="level-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MIDDLE: Connecting Pipe Conduit with Animated Traveling Arrows -->
+      <div class="pipe-connector-section">
+        <span class="pipe-side-label">Alimentação</span>
+        <div id="pipeConduit" class="pipe-conduit">
+          <div class="arrow-particle"></div>
+          <div class="arrow-particle"></div>
+          <div class="arrow-particle"></div>
+        </div>
+      </div>
+
+      <!-- BOTTOM: Dessalinizador Unit with Flow Rate Square Box -->
+      <section class="desal-section">
+        <div class="section-header">
+          <div class="section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+            Dessalinizador
+          </div>
+          <span id="desalStateTag" class="status-pill" style="padding: 2px 8px; font-size: 10px;">PRONTO</span>
+        </div>
+
+        <div class="desal-main-card">
+          <!-- Desalination Machine Illustration -->
+          <div id="desalUnitBox" class="desal-unit-box">
+            <div class="unit-top-lights">
+              <div id="ledPower" class="led-indicator power active" title="Alimentação"></div>
+              <div id="ledPump" class="led-indicator pump" title="Bomba Ativa"></div>
+            </div>
+
+            <div class="pump-rotor-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+            </div>
+
+            <div class="unit-label">DESSALINIZADOR</div>
+          </div>
+
+          <!-- Quadradinho de Fluxo de Água -->
+          <div id="flowMeterSquare" class="flow-meter-square">
+            <span class="flow-square-title">Fluxo de Água</span>
+            <div class="flow-square-value-row">
+              <span id="flowNumber" class="flow-number">0.0</span>
+              <span class="flow-unit-label">L/min</span>
+            </div>
+            <span id="flowSubText" class="flow-status-sub">Sem fluxo ativo</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOTTOM CONTROL BAR: Auto & Manual Buttons -->
+      <section class="control-bar-section">
+        <!-- Active Countdown Timer Banner -->
+        <div id="countdownStrip" class="countdown-strip" style="display: none;">
+          <span>⏳ Tempo Restante (Manual):</span>
+          <span id="countdownDigits" class="countdown-digits">00:00</span>
+        </div>
+
+        <div class="button-action-grid">
+          <!-- Botão Modo Automático -->
+          <button id="btnAutoMode" class="btn-main btn-auto active-mode">
+            <span>AUTOMÁTICO</span>
+            <span class="btn-sub">Controle por Boia</span>
+          </button>
+
+          <!-- Botão Ligar / Desligar Manual (com tempo obrigatório) -->
+          <button id="btnManualToggle" class="btn-main btn-manual-toggle">
+            <span id="manualToggleText">LIGAR MANUAL</span>
+            <span id="manualToggleSub" class="btn-sub">Definir Tempo ⏱️</span>
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Toast Notification Popup -->
+    <div id="toastBox" class="toast-box"></div>
+
+    <!-- MANDATORY TIMER SELECTION MODAL (When clicking Ligar Manual) -->
+    <div id="timerModalBackdrop" class="modal-backdrop">
+      <div class="modal-sheet">
+        <div class="modal-head">
+          <h3>⏱️ Tempo de Funcionamento</h3>
+          <button class="close-btn" onclick="closeTimerModal()">✕</button>
+        </div>
+        
+        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+          Para proteção do sistema, informe por quanto tempo o dessalinizador deverá ficar ligado no modo manual antes de desligar automaticamente:
+        </p>
+
+        <!-- Quick Presets -->
+        <div class="time-presets-grid">
+          <div class="preset-chip selected" data-sec="900">15 min</div>
+          <div class="preset-chip" data-sec="1800">30 min</div>
+          <div class="preset-chip" data-sec="3600">1 hora</div>
+          <div class="preset-chip" data-sec="7200">2 horas</div>
+          <div class="preset-chip" data-sec="10800">3 horas</div>
+          <div class="preset-chip" data-sec="custom">Outro</div>
+        </div>
+
+        <!-- Custom Duration Inputs -->
+        <div id="customTimeInputs" class="custom-time-inputs" style="display: none;">
+          <div class="input-box">
+            <label>Horas:</label>
+            <input type="number" id="inputCustomHours" min="0" max="24" value="0">
+          </div>
+          <div class="input-box">
+            <label>Minutos:</label>
+            <input type="number" id="inputCustomMinutes" min="1" max="59" value="45">
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button class="btn-cancel" onclick="closeTimerModal()">Cancelar</button>
+          <button id="btnConfirmStartManual" class="btn-start">Iniciar Dessalinizador</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
 </body>
 </html>
