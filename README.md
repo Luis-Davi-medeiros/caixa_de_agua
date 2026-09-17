@@ -1,6 +1,6 @@
-# 🌊 ThermoLink Web App — Sistema de Automação & Dessalinização de Água
+# 🌊 AquaLink Web App — Sistema de Automação & Dessalinização de Água
 
-Painel web progressivo (PWA) de alta tecnologia para monitoramento e controle do sistema **ThermoLink (ESP8266 Mestre Caixa d'Água + ESP8266 Escravo Dessalinizador)**.
+Painel web progressivo (PWA) de alta tecnologia para monitoramento e controle do sistema **AquaLink (ESP8266 Mestre Caixa d'Água + ESP8266 Escravo Dessalinizador)**.
 
 ---
 
@@ -40,7 +40,7 @@ Painel web progressivo (PWA) de alta tecnologia para monitoramento e controle do
 ## 📁 Estrutura dos Arquivos
 
 ```
-thermolink_web_app/
+aqualink_web_app/
 ├── index.html       # Interface visual completa e semântica
 ├── styles.css       # Estilização futurista Glassmorphism, animações e responsividade
 ├── app.js           # Máquina de estados, motor de física do simulador, API REST e gráfico
@@ -53,12 +53,12 @@ thermolink_web_app/
 ## 🛠️ Como Executar o Web App
 
 ### Opção 1: Abrir Diretamente no Navegador
-Basta dar um duplo clique no arquivo [`index.html`](file:///c:/Users/Luis%20Davi/Desktop/PROJETO%20ANDERSON/thermolink_web_app/index.html) ou abri-lo no Google Chrome, Edge, Safari ou Firefox.
+Basta dar um duplo clique no arquivo [`index.html`](file:///c:/Users/Luis%20Davi/Desktop/PROJETO%20ANDERSON/aqualink_web_app/index.html) ou abri-lo no Google Chrome, Edge, Safari ou Firefox.
 
 ### Opção 2: Conectar ao ESP8266 Caixa d'Água (Mestre)
-1. Ligue o ESP8266 Mestre (`ThermoLink_Caixa_Agua_Mestre_V3.0_OTIMIZADO.ino`).
+1. Ligue o ESP8266 Mestre (`AquaLink_Caixa_Agua_Mestre_V3.0_OTIMIZADO.ino`).
 2. No celular ou computador, conecte-se à rede Wi-Fi criada pelo ESP:
-   - **SSID**: `THERMOLINK_CAIXA`
+   - **SSID**: `AQUALINK_CAIXA`
    - **Senha**: `12345678`
 3. Abra o navegador e acesse:
    - `http://192.168.4.1/` (o próprio ESP serve os dados via `/api/status` e `/api/comando`).

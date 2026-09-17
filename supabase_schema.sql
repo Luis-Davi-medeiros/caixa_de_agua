@@ -1,5 +1,5 @@
 -- ============================================================================
--- THERMOLINK - ESTRUTURA DO BANCO DE DADOS SUPABASE
+-- AQUALINK - ESTRUTURA DO BANCO DE DADOS SUPABASE
 -- Sistema de Monitoramento de Água e Dessalinizador
 -- 
 -- INSTRUÇÕES DE EXECUÇÃO:

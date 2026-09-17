@@ -1,6 +1,6 @@
 {
-  "name": "ThermoLink — Monitoramento e Controle de Dessalinização",
-  "short_name": "ThermoLink",
+  "name": "AquaLink — Monitoramento e Controle de Dessalinização",
+  "short_name": "AquaLink",
   "description": "Sistema de Automação, Dessalinização e Monitoramento de Caixa d'Água ESP8266",
   "start_url": "./index.html",
   "display": "standalone",

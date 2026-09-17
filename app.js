@@ -1,5 +1,5 @@
 /**
- * ThermoLink Mobile Web App Controller (V2.0 com Supabase Realtime)
+ * AquaLink Mobile Web App Controller (V2.0 com Supabase Realtime)
  * Fortlev Tank, Animated Arrow Conduit, Desalination Flow Square & Mandatory Manual Timer
  */
 
