@@ -24,6 +24,7 @@ const appState = {
   
   dessalinizador: {
     online: true,
+    vazao_l_h: 0.0,
     vazao_l_min: 0.0,
     rele1: false,
     rele2: false,
@@ -85,6 +86,7 @@ function cacheElements() {
   el.btnManualToggle = document.getElementById('btnManualToggle');
   el.manualToggleText = document.getElementById('manualToggleText');
   el.manualToggleSub = document.getElementById('manualToggleSub');
+  el.btnEmergencyStop = document.getElementById('btnEmergencyStop'); // Botão de Parada de Emergência
 
   // Countdown Strip
   el.countdownStrip = document.getElementById('countdownStrip');
@@ -189,6 +191,16 @@ function applyTelemetryData(data, source) {
   appState.boiaMecanica = Boolean(data.boia_mecanica);
   appState.dessalinizador.online = Boolean(data.boia_online);
 
+  // Extração e conversão de vazão para Litros por Hora (L/h)
+  let vazaoLh = 0.0;
+  if (data.fluxo_l_h !== undefined && Number(data.fluxo_l_h) > 0) {
+    vazaoLh = Number(data.fluxo_l_h);
+  } else if (data.vazao_l_h !== undefined && Number(data.vazao_l_h) > 0) {
+    vazaoLh = Number(data.vazao_l_h);
+  } else if (data.fluxo_l_min !== undefined && Number(data.fluxo_l_min) > 0) {
+    vazaoLh = Number(data.fluxo_l_min) * 60.0; // Converte L/min para L/h
+  }
+
   // Proteção contra falha de fluxo (VÁLIDA NO MODO AUTOMÁTICO)
   // No modo manual, o temporizador definido pelo operador tem prioridade absoluta!
   if (data.erro_fluxo) {
@@ -209,9 +221,10 @@ function applyTelemetryData(data, source) {
   if (appState.modo === 1 && appState.timerRestanteSegundos > 0) {
     appState.comandoLigar = true;
     
-    // Se o ESP estiver online e enviando vazão real, exibe a vazão real
-    if (data.fluxo_l_min !== undefined && Number(data.fluxo_l_min) > 0) {
-      appState.dessalinizador.vazao_l_min = Number(data.fluxo_l_min);
+    // Se o ESP estiver online e enviando vazão real, exibe a vazão real em L/h
+    if (vazaoLh > 0) {
+      appState.dessalinizador.vazao_l_h = vazaoLh;
+      appState.dessalinizador.vazao_l_min = vazaoLh / 60.0;
     }
     if (data.rele1 !== undefined) appState.dessalinizador.rele1 = Boolean(data.rele1);
     if (data.rele2 !== undefined) appState.dessalinizador.rele2 = Boolean(data.rele2);
@@ -219,9 +232,8 @@ function applyTelemetryData(data, source) {
     // Fora do modo manual (Auto ou Desligado), sincroniza normalmente com o banco
     appState.modo = Number(data.modo ?? appState.modo);
     appState.comandoLigar = Boolean(data.deve_ligar || data.rele1);
-    if (data.fluxo_l_min !== undefined) {
-      appState.dessalinizador.vazao_l_min = Number(data.fluxo_l_min);
-    }
+    appState.dessalinizador.vazao_l_h = vazaoLh;
+    appState.dessalinizador.vazao_l_min = vazaoLh / 60.0;
     appState.dessalinizador.rele1 = Boolean(data.rele1);
     appState.dessalinizador.rele2 = Boolean(data.rele2);
   } else {
@@ -289,6 +301,13 @@ function bindEvents() {
       openTimerModal();
     }
   });
+
+  // Botão de Parada de Emergência Imediata
+  if (el.btnEmergencyStop) {
+    el.btnEmergencyStop.addEventListener('click', () => {
+      triggerEmergencyStop();
+    });
+  }
 
   // Seleção de tempo pré-definido no Modal (Chips)
   el.presetChips.forEach(chip => {
@@ -392,7 +411,7 @@ function startManualWithTimer(seconds) {
   updateVisuals();
 }
 
-// 3. Parar Manual / Desligamento de Emergência
+// 3. Parar Manual
 function stopManual() {
   console.log('[MANUAL] Desligamento manual solicitado pelo operador.');
   appState.modo = 2; // Manual Desligado
@@ -407,11 +426,30 @@ function stopManual() {
   updateVisuals();
 }
 
+// 4. Parada de Emergência Imediata
+function triggerEmergencyStop() {
+  console.log('[EMERGÊNCIA] Parada de Emergência acionada pelo operador!');
+  appState.modo = 2; // Manual Desligado / Emergência
+  appState.comandoLigar = false;
+  appState.dessalinizador.rele1 = false;
+  appState.dessalinizador.rele2 = false;
+  appState.dessalinizador.vazao_l_h = 0.0;
+  appState.dessalinizador.vazao_l_min = 0.0;
+  appState.manualCommandTimestamp = Date.now();
+  if (appState.timerInterval) clearInterval(appState.timerInterval);
+  el.countdownStrip.style.display = 'none';
+
+  dispatchCommand('emergencia', 0);
+  showToast('🛑 PARADA DE EMERGÊNCIA ATIVADA! Bombas desligadas.');
+  evaluateSystemState();
+  updateVisuals();
+}
+
 // ======================== Despacho de Comandos (Nuvem & Local) ========================
 async function dispatchCommand(tipo, seconds = 0) {
   let supabaseCommand = tipo;
   if (tipo === 'ligar') supabaseCommand = 'manual_on';
-  else if (tipo === 'desligar') supabaseCommand = 'manual_off';
+  else if (tipo === 'desligar' || tipo === 'emergencia') supabaseCommand = 'manual_off';
   else if (tipo === 'auto') supabaseCommand = 'auto';
 
   // 1. Envia comando para a fila do Supabase e atualiza o device_state imediatamente
@@ -432,7 +470,7 @@ async function dispatchCommand(tipo, seconds = 0) {
 
       // Atualiza o device_state instantaneamente para sincronia imediata entre navegadores
       const updateData = {
-        modo: (tipo === 'ligar' ? 1 : (tipo === 'desligar' ? 2 : 0)),
+        modo: (tipo === 'ligar' ? 1 : ((tipo === 'desligar' || tipo === 'emergencia') ? 2 : 0)),
         deve_ligar: (tipo === 'ligar'),
         rele1: (tipo === 'ligar'),
         rele2: (tipo === 'ligar'),
@@ -514,11 +552,13 @@ function stepSimulation() {
     : (appState.comandoLigar && !appState.boiaMecanica && !appState.dessalinizador.erro_fluxo);
 
   if (podeBombear) {
-    appState.dessalinizador.vazao_l_min = 14.2 + (Math.sin(Date.now() / 1500) * 0.5);
+    appState.dessalinizador.vazao_l_h = 852.0 + (Math.sin(Date.now() / 1500) * 30.0);
+    appState.dessalinizador.vazao_l_min = appState.dessalinizador.vazao_l_h / 60.0;
     appState.dessalinizador.rele1 = true;
     appState.dessalinizador.rele2 = true;
     appState.nivel = Math.min(100, appState.nivel + 0.35); // Enche gradualmente
   } else {
+    appState.dessalinizador.vazao_l_h = 0.0;
     appState.dessalinizador.vazao_l_min = 0.0;
     appState.dessalinizador.rele1 = false;
     appState.dessalinizador.rele2 = false;
@@ -540,7 +580,7 @@ function updateVisuals() {
   const emManual = (appState.modo === 1 && appState.comandoLigar);
   
   // No modo manual, o bombeamento entra DIRETO e IMEDIATAMENTE independente de qualquer boia ou fluxo!
-  const isPumping = emManual || (!appState.dessalinizador.erro_fluxo && appState.comandoLigar && appState.dessalinizador.vazao_l_min > 0.1);
+  const isPumping = emManual || (!appState.dessalinizador.erro_fluxo && appState.comandoLigar && (appState.dessalinizador.vazao_l_h > 5.0 || appState.dessalinizador.vazao_l_min > 0.1));
 
   const nivelRound = Math.round(appState.nivel);
 
@@ -585,17 +625,17 @@ function updateVisuals() {
   // 2. Tubulação de Alimentação com Partículas e Setas Animadas
   el.pipeConduit.classList.toggle('flowing', isPumping);
 
-  // 3. Unidade do Dessalinizador e Mostrador de Vazão
+  // 3. Unidade do Dessalinizador e Mostrador de Vazão (L/h)
   el.desalUnitBox.classList.toggle('active', isPumping);
   el.ledPump.classList.toggle('active', isPumping);
   el.flowMeterSquare.classList.toggle('flowing', isPumping);
 
-  // Exibe a vazão real do sensor ou vazão nominal enquanto no manual
-  let vazaoExibida = appState.dessalinizador.vazao_l_min;
+  // Exibe a vazão real do sensor ou vazão nominal em L/h enquanto no manual
+  let vazaoExibida = appState.dessalinizador.vazao_l_h;
   if (emManual && vazaoExibida <= 0.0) {
-    vazaoExibida = 14.5;
+    vazaoExibida = 850.0;
   }
-  el.flowNumber.textContent = isPumping ? vazaoExibida.toFixed(1) : '0.0';
+  el.flowNumber.textContent = isPumping ? Math.round(vazaoExibida).toString() : '0';
   el.flowSubText.textContent = isPumping 
     ? (emManual ? 'Bombeando (Modo Manual Ativo)' : 'Bombeando para a caixa') 
     : 'Sem fluxo ativo';

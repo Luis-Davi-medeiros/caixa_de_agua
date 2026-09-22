@@ -145,19 +145,19 @@
             <div class="unit-label">DESSALINIZADOR</div>
           </div>
 
-          <!-- Quadradinho de Fluxo de Água -->
+          <!-- Quadradinho de Fluxo de Água (Litros por Hora) -->
           <div id="flowMeterSquare" class="flow-meter-square">
             <span class="flow-square-title">Fluxo de Água</span>
             <div class="flow-square-value-row">
-              <span id="flowNumber" class="flow-number">0.0</span>
-              <span class="flow-unit-label">L/min</span>
+              <span id="flowNumber" class="flow-number">0</span>
+              <span class="flow-unit-label">L/h</span>
             </div>
             <span id="flowSubText" class="flow-status-sub">Sem fluxo ativo</span>
           </div>
         </div>
       </section>
 
-      <!-- BOTTOM CONTROL BAR: Auto & Manual Buttons -->
+      <!-- BOTTOM CONTROL BAR: Auto, Manual & Emergency Stop Buttons -->
       <section class="control-bar-section">
         <!-- Active Countdown Timer Banner -->
         <div id="countdownStrip" class="countdown-strip" style="display: none;">
@@ -176,6 +176,22 @@
           <button id="btnManualToggle" class="btn-main btn-manual-toggle">
             <span id="manualToggleText">LIGAR MANUAL</span>
             <span id="manualToggleSub" class="btn-sub">Definir Tempo ⏱️</span>
+          </button>
+        </div>
+
+        <!-- Botão Parada de Emergência -->
+        <div class="emergency-action-row">
+          <button id="btnEmergencyStop" class="btn-emergency" title="Corte imediato de todas as bombas">
+            <div class="emergency-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <rect x="9" y="9" width="6" height="6" fill="currentColor"></rect>
+              </svg>
+            </div>
+            <div class="emergency-text-col">
+              <span class="emergency-title">PARADA DE EMERGÊNCIA</span>
+              <span class="emergency-sub">Desliga Todas as Bombas Imediatamente 🛑</span>
+            </div>
           </button>
         </div>
       </section>

@@ -731,6 +731,76 @@ body {
   opacity: 0.85;
 }
 
+/* Emergency Stop Action Button */
+.emergency-action-row {
+  margin-top: 2px;
+}
+
+.btn-emergency {
+  width: 100%;
+  border: 1px solid #f87171;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #991b1b 100%);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+.btn-emergency:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #b91c1c 100%);
+  box-shadow: 0 0 22px rgba(239, 68, 68, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-emergency:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.6);
+}
+
+.emergency-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: pulseEmergency 2s infinite;
+}
+
+@keyframes pulseEmergency {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+.emergency-text-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
+}
+
+.emergency-title {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: #fff;
+}
+
+.emergency-sub {
+  font-size: 10px;
+  font-weight: 600;
+  color: #fecaca;
+  opacity: 0.95;
+}
+
 /* Active Countdown Timer Display */
 .countdown-strip {
   background: rgba(0, 0, 0, 0.4);
